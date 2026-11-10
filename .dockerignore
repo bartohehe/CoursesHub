@@ -1,0 +1,15 @@
+# Build artifacts and local state — never ship these into the image.
+server
+server.exe
+*.exe
+data/
+*.db
+*.db-shm
+*.db-wal
+scratch_server.log
+
+# VCS / editor / CI
+.git/
+.github/
+.gitignore
+*.md

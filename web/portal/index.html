@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses Hub</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-row">
+      <div>
+        <h1>Courses Hub</h1>
+        <p class="subtitle">Twoje interaktywne kursy w jednym miejscu</p>
+        <div class="stats" id="stats" hidden></div>
+      </div>
+      <button class="btn btn-primary" id="add-btn" type="button">+ Dodaj kurs</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="main">
+    <p class="state" id="loading">Ładowanie kursów…</p>
+    <p class="state error" id="error" hidden>Nie udało się załadować kursów. Sprawdź, czy serwer działa.</p>
+    <div class="empty" id="empty" hidden>
+      <p>Nie masz jeszcze żadnych kursów.</p>
+      <button class="btn btn-primary" type="button" data-open-add>+ Dodaj pierwszy kurs</button>
+    </div>
+    <div id="categories"></div>
+  </main>
+
+  <dialog id="add-dialog" aria-labelledby="add-title">
+    <form id="add-form" novalidate>
+      <h2 id="add-title">Dodaj kurs</h2>
+
+      <label class="field">
+        <span>Plik kursu (HTML)</span>
+        <input type="file" name="file" accept=".html,.htm,text/html" required>
+        <small>Tytuł wypełni się sam z &lt;title&gt; pliku — możesz go zmienić.</small>
+      </label>
+
+      <label class="field">
+        <span>Tytuł</span>
+        <input type="text" name="title" maxlength="200" required autocomplete="off">
+      </label>
+
+      <label class="field">
+        <span>Slug</span>
+        <input type="text" name="slug" maxlength="64" required autocomplete="off"
+               pattern="[a-z0-9]+(-[a-z0-9]+)*" spellcheck="false">
+        <small>Adres kursu: <code>/courses/<span id="slug-preview">…</span>/</code></small>
+      </label>
+
+      <label class="field">
+        <span>Opis <em>(opcjonalnie)</em></span>
+        <textarea name="description" rows="3" maxlength="1000"></textarea>
+      </label>
+
+      <label class="field">
+        <span>Kategoria</span>
+        <input type="text" name="category" list="category-list" maxlength="50"
+               placeholder="np. programming, ml, data" autocomplete="off">
+        <datalist id="category-list"></datalist>
+      </label>
+
+      <p class="form-error" id="form-error" role="alert" hidden></p>
+
+      <div class="dialog-actions">
+        <button type="button" class="btn" id="cancel-btn">Anuluj</button>
+        <button type="submit" class="btn btn-primary" id="submit-btn">Dodaj kurs</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>

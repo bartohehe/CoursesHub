@@ -1,0 +1,13 @@
+# Compiled binaries
+/server
+/server.exe
+*.exe
+
+# Local database / runtime state
+/data/
+*.db
+*.db-shm
+*.db-wal
+
+# Logs / scratch
+*.log

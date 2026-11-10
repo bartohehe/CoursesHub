@@ -1,0 +1,18 @@
+services:
+  courses-hub:
+    build: .                    # buduje obraz lokalnie z Dockerfile
+    image: courses-hub:latest   # nazwa lokalnego obrazu po zbudowaniu
+    container_name: courses-hub
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - courses-data:/data      # baza SQLite + wrzucone kursy
+    environment:
+      ADDR: ":8080"
+      DB_PATH: "/data/courses.db"
+      COURSES_DIR: "/data/courses"
+      MAX_UPLOAD_MB: "50"
+
+volumes:
+  courses-data:
