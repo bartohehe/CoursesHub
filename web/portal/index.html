@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Courses Hub</title>
-  <link rel="stylesheet" href="/style.css">
+  <!-- ?v= forces browsers to drop copies cached before the server sent
+       Cache-Control: no-cache. Bump it only if that ever happens again. -->
+  <link rel="stylesheet" href="/style.css?v=2">
 </head>
 <body>
   <header class="site-header">
@@ -55,12 +57,16 @@
         <textarea name="description" rows="3" maxlength="1000"></textarea>
       </label>
 
-      <label class="field">
-        <span>Kategoria</span>
-        <input type="text" name="category" list="category-list" maxlength="50"
-               placeholder="np. programming, ml, data" autocomplete="off">
-        <datalist id="category-list"></datalist>
-      </label>
+      <div class="field">
+        <label class="field-label" for="category-input">Kategoria</label>
+        <div class="combo">
+          <input type="text" id="category-input" name="category" maxlength="50"
+                 placeholder="np. programming, ml, data" autocomplete="off"
+                 role="combobox" aria-autocomplete="list" aria-expanded="false"
+                 aria-controls="category-list">
+          <ul class="combo-list" id="category-list" role="listbox" hidden></ul>
+        </div>
+      </div>
 
       <p class="form-error" id="form-error" role="alert" hidden></p>
 
@@ -71,6 +77,6 @@
     </form>
   </dialog>
 
-  <script src="/app.js"></script>
+  <script src="/app.js?v=2"></script>
 </body>
 </html>

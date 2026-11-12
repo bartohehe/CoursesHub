@@ -117,5 +117,9 @@ curl -F file=@kurs.html -F title="Mój kurs" -F slug=moj-kurs -F category=progra
 jest potrzebny. Obraz z GHCR można uruchomić wprost:
 
 ```bash
-docker run -d -p 8080:8080 -v courses-data:/data ghcr.io/<owner>/courses-hub:latest
+docker run -d -p 8080:8080 -v courses-data:/data ghcr.io/bartohehe/courseshub:latest
 ```
+
+Pakiety w GHCR są domyślnie prywatne — przed `docker pull` trzeba się zalogować
+(`docker login ghcr.io`, token z uprawnieniem `read:packages`) albo ustawić pakiet
+jako publiczny w ustawieniach pakietu na GitHubie.

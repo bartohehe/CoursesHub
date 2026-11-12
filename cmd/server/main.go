@@ -46,8 +46,9 @@ func main() {
 		w.Write([]byte("ok"))
 	})
 
-	// Portal (list of courses, tracking.js) served at the root.
-	mux.Handle("/", http.FileServer(http.Dir(filepath.Join(webDir, "portal"))))
+	// Portal (list of courses, tracking.js) served at the root. no-cache makes
+	// browsers revalidate, so a redeploy shows up without a hard refresh.
+	mux.Handle("/", noCache(http.FileServer(http.Dir(filepath.Join(webDir, "portal")))))
 
 	srv := &http.Server{
 		Addr:              addr,
@@ -90,6 +91,15 @@ func getenvInt(key string, fallback int) int {
 		log.Printf("invalid %s=%q, using %d", key, v, fallback)
 	}
 	return fallback
+}
+
+// noCache tells browsers to revalidate files on every request (cheap: an
+// unchanged file still gets a 304 Not Modified).
+func noCache(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Cache-Control", "no-cache")
+		next.ServeHTTP(w, r)
+	})
 }
 
 // logRequests is a tiny logging middleware so I can see traffic.

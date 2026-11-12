@@ -16,6 +16,9 @@ const CATEGORY_LABELS = {
 
 const DEFAULT_CATEGORIES = ["programming", "ml", "data"];
 
+// Categories suggested in the add-course form (defaults + ones already in use).
+let knownCategories = [...DEFAULT_CATEGORIES];
+
 const $ = (id) => document.getElementById(id);
 
 function el(tag, className, text) {
@@ -114,12 +117,7 @@ function render(courses) {
     container.appendChild(section);
   }
 
-  const categories = new Set([...DEFAULT_CATEGORIES, ...courses.map((c) => c.category).filter(Boolean)]);
-  $("category-list").replaceChildren(...[...categories].map((c) => {
-    const opt = el("option");
-    opt.value = c;
-    return opt;
-  }));
+  knownCategories = [...new Set([...DEFAULT_CATEGORIES, ...courses.map((c) => c.category).filter(Boolean)])];
 }
 
 async function load() {
@@ -196,6 +194,7 @@ function setTitle(value) {
 
 function openDialog() {
   form.reset();
+  closeCategories();
   slugEdited = false;
   formError.hidden = true;
   updateSlugPreview();
@@ -227,6 +226,87 @@ fields.file.addEventListener("change", async () => {
     title = doc.title.trim();
   } catch { /* fall back to the filename */ }
   setTitle(title || file.name.replace(/\.html?$/i, ""));
+});
+
+// ---- category combobox (styled replacement for <datalist>) -----------------
+
+const catInput = $("category-input");
+const catList = $("category-list");
+let catActive = -1;
+
+function matchingCategories() {
+  const q = catInput.value.trim().toLowerCase();
+  if (!q) return knownCategories;
+  return knownCategories.filter((c) =>
+    c.toLowerCase().includes(q) || (CATEGORY_LABELS[c] || "").toLowerCase().includes(q));
+}
+
+function openCategories() {
+  const options = matchingCategories();
+  if (!options.length) return closeCategories();
+
+  catActive = -1;
+  catList.replaceChildren(...options.map((c, i) => {
+    const li = el("li", "combo-option");
+    li.id = `category-option-${i}`;
+    li.setAttribute("role", "option");
+    li.dataset.value = c;
+    li.appendChild(el("span", null, c));
+    if (CATEGORY_LABELS[c]) li.appendChild(el("small", null, CATEGORY_LABELS[c]));
+    // mousedown + preventDefault keeps focus in the input (no blur → close race).
+    li.addEventListener("mousedown", (e) => {
+      e.preventDefault();
+      pickCategory(c);
+    });
+    return li;
+  }));
+  catList.hidden = false;
+  catInput.setAttribute("aria-expanded", "true");
+
+  // Open upwards when there is not enough room below inside the dialog.
+  catList.classList.remove("up");
+  const room = dialog.getBoundingClientRect().bottom - catInput.getBoundingClientRect().bottom;
+  if (catList.offsetHeight + 16 > room) catList.classList.add("up");
+}
+
+function closeCategories() {
+  catList.hidden = true;
+  catActive = -1;
+  catInput.setAttribute("aria-expanded", "false");
+  catInput.removeAttribute("aria-activedescendant");
+}
+
+function pickCategory(value) {
+  catInput.value = value;
+  closeCategories();
+}
+
+function moveActive(step) {
+  const items = [...catList.children];
+  if (!items.length) return;
+  catActive = (catActive + step + items.length) % items.length;
+  items.forEach((li, i) => li.classList.toggle("active", i === catActive));
+  catInput.setAttribute("aria-activedescendant", items[catActive].id);
+  items[catActive].scrollIntoView({ block: "nearest" });
+}
+
+catInput.addEventListener("focus", openCategories);
+catInput.addEventListener("input", openCategories);
+catInput.addEventListener("click", () => { if (catList.hidden) openCategories(); });
+catInput.addEventListener("blur", closeCategories);
+catInput.addEventListener("keydown", (e) => {
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    if (catList.hidden) openCategories();
+    moveActive(e.key === "ArrowDown" ? 1 : -1);
+  } else if (e.key === "Enter" && !catList.hidden && catActive >= 0) {
+    e.preventDefault(); // pick the option instead of submitting the form
+    pickCategory(catList.children[catActive].dataset.value);
+  } else if (e.key === "Escape" && !catList.hidden) {
+    e.preventDefault(); // close only the list, not the whole dialog
+    e.stopPropagation();
+    closeCategories();
+  }
 });
 
 form.addEventListener("submit", async (e) => {

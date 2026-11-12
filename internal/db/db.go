@@ -33,7 +33,33 @@ func Open(path string) (*DB, error) {
 	if err := d.migrate(); err != nil {
 		return nil, err
 	}
+	if err := d.removeLegacySeed(); err != nil {
+		return nil, err
+	}
 	return d, nil
+}
+
+// removeLegacySeed deletes the four example courses that early versions seeded
+// into every new database. They are matched by slug AND by the old path format
+// ("/courses/<slug>/index.html"); uploaded courses use "/courses/<slug>/", so
+// a real course with the same slug is never touched.
+func (d *DB) removeLegacySeed() error {
+	const match = `slug IN ('web-scraping', 'ml-fundamentals', 'data-stack', 'decomposition')
+		AND path = '/courses/' || slug || '/index.html'`
+
+	tx, err := d.Begin()
+	if err != nil {
+		return fmt.Errorf("remove legacy seed: %w", err)
+	}
+	defer tx.Rollback()
+
+	if _, err := tx.Exec(`DELETE FROM progress WHERE course_id IN (SELECT id FROM courses WHERE ` + match + `)`); err != nil {
+		return fmt.Errorf("remove legacy seed progress: %w", err)
+	}
+	if _, err := tx.Exec(`DELETE FROM courses WHERE ` + match); err != nil {
+		return fmt.Errorf("remove legacy seed courses: %w", err)
+	}
+	return tx.Commit()
 }
 
 const schema = `

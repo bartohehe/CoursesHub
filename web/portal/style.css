@@ -296,7 +296,8 @@ dialog h2 {
   margin-bottom: 1rem;
 }
 
-.field > span {
+.field > span,
+.field-label {
   display: block;
   font-size: 0.85rem;
   font-weight: 500;
@@ -358,6 +359,80 @@ dialog h2 {
   margin-right: 0.75rem;
   cursor: pointer;
 }
+
+/* ---- category combobox ---- */
+
+.combo { position: relative; }
+
+.combo input { padding-right: 2.2rem; }
+
+/* Chevron drawn with borders; rotates when the list is open. */
+.combo::after {
+  content: "";
+  position: absolute;
+  right: 0.9rem;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  margin-top: -6px;
+  border-right: 1.5px solid var(--text-faint);
+  border-bottom: 1.5px solid var(--text-faint);
+  transform: rotate(45deg);
+  transition: transform 0.15s ease, margin 0.15s ease;
+  pointer-events: none;
+}
+
+.combo:has(input[aria-expanded="true"])::after {
+  transform: rotate(-135deg);
+  margin-top: -2px;
+  border-color: var(--accent);
+}
+
+.combo-list {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 10;
+  margin: 0;
+  padding: 0.3rem;
+  list-style: none;
+  max-height: 220px;
+  overflow-y: auto;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hover);
+  border-radius: 10px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.5);
+}
+
+.combo-list.up {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+
+.combo-option {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 7px;
+  font-size: 0.92rem;
+  cursor: pointer;
+}
+
+.combo-option small {
+  font-size: 0.78rem;
+  color: var(--text-faint);
+}
+
+.combo-option:hover,
+.combo-option.active {
+  background: var(--accent-soft);
+}
+
+.combo-option.active { color: #fff; }
+.combo-option.active small { color: var(--text-dim); }
 
 .form-error {
   margin: 0 0 1rem;
